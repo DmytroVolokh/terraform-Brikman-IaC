@@ -15,6 +15,8 @@ resource "aws_launch_configuration" "example" {
 
 resource "aws_autoscaling_group" "example" {
   launch_configuration = aws_launch_configuration.example.name
+  target_group_arns    = [aws_lb_target_group.asg.arn]
+  health_check_type    = "ELB"
   min_size             = 2
   max_size             = 10
   vpc_zone_identifier  = data.aws_subnet_ids.default.ids
@@ -93,5 +95,18 @@ resource "aws_lb_target_group" "asg" {
     timeout             = 3
     healthy_threshold   = 2
     unhealthy_threshold = 2
+  }
+}
+
+resource "aws_lb_listener_rule" "asg" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 100
+  condition {
+    field  = "path-pattern"
+    values = ["*"]
+  }
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.asg.arn
   }
 }
