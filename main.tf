@@ -102,16 +102,12 @@ resource "aws_lb_listener_rule" "asg" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 100
   condition {
-    field  = "path-pattern"
-    values = ["*"]
+    path_pattern {
+      values = ["*"]
+    }
   }
   action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.asg.arn
   }
-}
-
-output "alb_dns_name" {
-  value       = aws_lb.example.dns_name
-  description = "The domain name of the load balancer"
 }
